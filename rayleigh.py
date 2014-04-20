@@ -6,31 +6,22 @@ import matplotlib.pyplot as plt
 import math
 import random
 
-def stop_and_wait(pb, d, rb, n, k):
-    return ((1 - pb)** n / (1 + d*rb / n)) * (k / n)
-    
-def go_back_n(pb, n, k, N):
-    return ((1 - pb)**n / ((1 - pb)**n + N * (1 - (1 - pb)**n))) * (k / n)
-    
-def selective_repeat(pb, n, k):
-    return (1 - pb) ** n * (k / n)
-
 
 def randn():
     return random.gauss(0, 1)
     
 if __name__ == '__main__':
-    N = 256 # Number of frequency samples
-    M = 8192 # Number of time samples
+    N = 15 # Number of frequency samples
+    M = 100000 # Number of time samples
 
     # Required parameters for INPUT: fm and row (r0)
-    fm = int(raw_input("ENTER THE VALUE OF fm [20 Hz, 200Hz]:"))
-    r0 = float(raw_input("ENTER THE VALUE OF r0 [1,0.1,0.01]:"))
+    fm = 100
+    r0 = 0.1
 
     y = 1
     Afd_p = 0 # Average fade duration; practical value
     Nr_p = 0 # Number of Zero-crossing level per second
-    Rrms_p=0 # Practically calculated R-rms value
+    Rrms_p = 0 # Practically calculated R-rms value
     
     while y <= 1:
         delta_f = 2 * fm / float(N) # Frequency resolution
@@ -49,6 +40,7 @@ if __name__ == '__main__':
             X.append(0)
             Y.append(0)
 
+            
         for m in xrange(M - N/2 - 1, M):
             X.append(X[M - m].conjugate())
             Y.append(Y[M - m].conjugate())
@@ -84,54 +76,14 @@ if __name__ == '__main__':
         level = 20 * math.log(r0*rms, 10)
 
         R = [ m - Rrms for m in r]
+        x = [ i / 10000.0 for i in xrange(len(R)) ]
 
-        plt.axis([1, 8192, -60, 20])
-        plt.plot(R)
+        plt.axis([1, 10, -60, 20])
+        plt.title('Rayleigh fading signal')
+        plt.xlabel('Time Samples, s')
+        plt.ylabel('Instantaneous Power dB')
+        plt.plot(x, R)
         plt.show()
-
-        # Calculating (Practically) Number of Zero Level Crossing and Average Fade Duration
-
-        h = 0
-        c = 0
-        C1 = 0
-        NUM = 0
-
-        while h <= M-1:
-            if r[h] <= level:
-                i = h
-                while i <= M-1:
-                    if r[i] >= level:
-                        NUM = NUM + 1
-                        break
-                    i = i + 1
-
-                c = i - h
-                C1 = C1 + c
-                h = i - 1
-
-            h = h + 1
-        
-        Afd_p = Afd_p + (C1/NUM) * delta_t
-        Nr_p = Nr_p + NUM * delta_f
-        Rrms_p = Rrms_p + Rrms
 
         y = y + 1
 
-    # ************ Theoretical calculation of Number of Zero Level Crossing (Nr) and Average Fade Duration ************* %
-
-    Nr_theoretical = math.sqrt(2 * math.pi) * fm * r0 *math.exp(-r0**2)
-    
-    z1 = math.exp(r0**2) - 1
-    z2 = r0 * fm * math.sqrt(2 * math.pi)
-    Average_fade_duration_theoretical = z1 / z2
-
-    rowdb = 10 * math.log(r0, 10)
-    Rrms_theoretical = Rrms + rowdb
-    print Average_fade_duration_theoretical, Afd_p
-    
-    values = plt.plot(np.random.rayleigh(3, 1000))
-    meanvalue = 1
-    modevalue = np.sqrt(2 / np.pi) * meanvalue
-    s = np.random.rayleigh(modevalue, 1000000)
-    
-    
