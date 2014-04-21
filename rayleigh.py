@@ -6,12 +6,11 @@ import matplotlib.pyplot as plt
 import math
 import random
 
-
 def randn():
     return random.gauss(0, 1)
     
 if __name__ == '__main__':
-    N = 15 # Number of frequency samples
+    N = 256 # Number of frequency samples
     M = 100000 # Number of time samples
 
     # Required parameters for INPUT: fm and row (r0)
